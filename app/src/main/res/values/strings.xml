@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ArchitectureTemplate</string>
+
+    <string name="weather_title">Weather Title</string>
+</resources>
