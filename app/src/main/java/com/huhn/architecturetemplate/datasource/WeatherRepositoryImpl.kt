@@ -6,7 +6,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.huhn.architecturetemplate.application.ArchitectureTemplateApplication
 import com.huhn.architecturetemplate.datasource.localdatasource.AppDatabase
 import com.huhn.architecturetemplate.datasource.localdatasource.DBWeatherDao
-import com.huhn.architecturetemplate.datasource.localdatasource.dbModel.DBWeather
 import com.huhn.architecturetemplate.datasource.remotedatasource.WeatherApiService
 import com.huhn.architecturetemplate.datasource.remotedatasource.networkModel.WeatherResponse
 import com.huhn.architecturetemplate.ui.WeatherUIState
@@ -123,10 +122,6 @@ class WeatherRepositoryImpl(
         return weather?.let {
             it.convertToState()
         }
-    }
-
-    suspend fun saveWeatherLocal(dbWeather: DBWeather) {
-        dbWeatherDao.insertWeather(weather = dbWeather)
     }
 
     private fun getWeatherRemote(

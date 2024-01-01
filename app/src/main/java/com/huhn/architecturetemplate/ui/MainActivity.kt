@@ -1,4 +1,4 @@
-package com.huhn.architecturetemplate
+package com.huhn.architecturetemplate.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
