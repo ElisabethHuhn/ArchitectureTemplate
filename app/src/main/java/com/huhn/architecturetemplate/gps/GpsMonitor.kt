@@ -12,7 +12,7 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.explor.accsensor.utils.getActivity
+import com.huhn.architecturetemplate.utils.getActivity
 
 class GpsMonitor {
     companion object {

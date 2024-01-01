@@ -1,4 +1,4 @@
-package net.explor.accsensor.utils
+package com.huhn.architecturetemplate.utils
 
 import android.content.Context
 import android.content.ContextWrapper
