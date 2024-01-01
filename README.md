@@ -79,6 +79,8 @@ The project is an example of State of the Art Android Architecture circa 2023. I
 * add secret to local.properties
 * Load the secret from BuildConfig
 
+## Update Dependency Injection i.e. Koin
+
 ## Update Permissions
 
 ## Change UI
@@ -106,6 +108,6 @@ The project is an example of State of the Art Android Architecture circa 2023. I
 
 ## Update Network i.e. Retrofit
 
-
-
 ## Update Local Storage i.e. Room
+
+## Update Unit Tests

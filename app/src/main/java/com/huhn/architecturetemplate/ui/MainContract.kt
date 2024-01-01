@@ -1,5 +1,6 @@
 package com.huhn.architecturetemplate.ui
 
+import android.content.Context
 import android.location.Location
 import com.google.android.gms.location.FusedLocationProviderClient
 
@@ -40,7 +41,7 @@ sealed interface WeatherUserEvent {
     data class OnUsStateEvent (val data: String?) : WeatherUserEvent
     data class OnCountryEvent (val data: String?) : WeatherUserEvent
     data class OnDisplayWeatherEvent(val isByLoc: Boolean = false) : WeatherUserEvent
-    data object OnGetLocation : WeatherUserEvent
+    data class OnGetLocation(val context: Context) : WeatherUserEvent
     data class OnLatitudeEvent (val data: String): WeatherUserEvent
     data class OnLongitudeEvent (val data: String): WeatherUserEvent
 }

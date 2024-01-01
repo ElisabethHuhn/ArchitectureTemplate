@@ -134,18 +134,15 @@ class MainRepositoryImpl(
             val weatherResponse : WeatherResponse? =
                 when {
                     (isByLoc &&
-                            ((latitude  != null) &&
-                                    (longitude != null) &&
-                                    ( (latitude != 0.0) && (longitude != 0.0))
-                                    )
-                            ) -> {
+                     (latitude  != null) && (latitude  != 0.0) &&
+                     (longitude != null) && (longitude != 0.0)) -> {
                         weatherApi.fetchWeatherLatLng(
                             latitude = latitude,
                             longitude = longitude
                         )
                     }
 
-                    (!isByLoc && !city.isNullOrEmpty())-> {
+                    (!isByLoc && !city.isNullOrEmpty()) -> {
                         var cityString = city
                         if (!usState.isNullOrEmpty()) cityString = "$cityString,$usState"
                         if (!country.isNullOrEmpty()) cityString = "$cityString,$country"

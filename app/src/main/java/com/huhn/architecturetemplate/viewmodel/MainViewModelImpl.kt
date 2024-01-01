@@ -1,9 +1,11 @@
 package com.huhn.architecturetemplate.viewmodel
 
+import android.content.Context
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.huhn.architecturetemplate.datasource.MainRepositoryImpl
+import com.huhn.architecturetemplate.gps.GpsMonitor
 import com.huhn.architecturetemplate.ui.LocationState
 import com.huhn.architecturetemplate.ui.WeatherUIState
 import com.huhn.architecturetemplate.ui.WeatherUserEvent
@@ -34,7 +36,7 @@ class MainViewModelImpl(
             is WeatherUserEvent.OnUsStateEvent -> onUsStateChanged(event.data ?: "")
             is WeatherUserEvent.OnCountryEvent -> onCountryChanged(event.data ?: "")
             is WeatherUserEvent.OnDisplayWeatherEvent -> onDisplayWeather(event.isByLoc)
-            is WeatherUserEvent.OnGetLocation -> onGetLocation()
+            is WeatherUserEvent.OnGetLocation ->  getCurrentLocation(event.context)  // onGetLocation()
             is WeatherUserEvent.OnLatitudeEvent -> onLatitudeChanged(event.data )
             is WeatherUserEvent.OnLongitudeEvent -> onLongitudeChanged(event.data )
         }
@@ -70,6 +72,16 @@ class MainViewModelImpl(
         _weatherState.update { it.copy(errorMsg = data) }
     }
 
+    private fun getCurrentLocation(context: Context) {
+        GpsMonitor.fetchCurrentLocation(context = context, this::onGpsUpdate)
+        onLocationChanged(locationState.value.location )
+    }
+
+    private fun onGpsUpdate (currentLocation: Location) =
+        _locationState.update {
+            it.copy(location = currentLocation)
+        }
+
     private fun onLocationChanged(location: Location?) {
         onLocLatitudeChanged(data = location?.latitude.toString() )
         onLocLongitudeChanged(data = location?.longitude.toString() )
@@ -85,12 +97,12 @@ class MainViewModelImpl(
         onLongitudeChanged(data = locationState.value.locLongitude)
     }
 
-    private fun onInitialization() {
+    fun onInitialization() {
         _weatherState.update { it.copy(
             city = "Atlanta",
             usState = "Georgia",
             country = "USA",
-            latitude = "34.xxx",
+            latitude = "34.000",
             longitude = "-84.9999",
             description = "Nice weather today",
             icon = "some_url",

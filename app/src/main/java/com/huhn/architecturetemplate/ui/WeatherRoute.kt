@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -57,6 +58,7 @@ fun WeatherRoute(
 
     //preload weather from last time the app ran
     LaunchedEffect(key1 = "firsttime" ){
+        viewModel.onInitialization()
         viewModel.onWeatherUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(false))
    }
 
@@ -103,6 +105,7 @@ fun WeatherScreen(
     ) {it
 
         val keyboardController = LocalSoftwareKeyboardController.current
+        val context = LocalContext.current
 
         Column(
             modifier = Modifier
@@ -210,7 +213,7 @@ fun WeatherScreen(
 
             Button(
                 onClick = {
-                    onUserEvent(WeatherUserEvent.OnGetLocation)
+                    onUserEvent(WeatherUserEvent.OnGetLocation(context))
                     onUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = true))
                     onUserEvent(WeatherUserEvent.OnShowHideDetailsChanged(data = true))
                 })
