@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
-interface WeatherRepository {
+interface MainRepository {
     suspend fun getWeather(
         isByLoc: Boolean,
         latitude: String?,
@@ -23,10 +23,10 @@ interface WeatherRepository {
 }
 
 
-class WeatherRepositoryImpl(
+class MainRepositoryImpl(
     //remote data source variables
     private val weatherApi: WeatherApiService
-) : WeatherRepository  {
+) : MainRepository  {
 
     //local data source variables
     private var db: AppDatabase

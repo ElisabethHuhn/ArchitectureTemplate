@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.huhn.architecturetemplate.R
-import com.huhn.architecturetemplate.viewmodel.WeatherViewModelImpl
+import com.huhn.architecturetemplate.viewmodel.MainViewModelImpl
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +52,7 @@ import org.koin.androidx.compose.koinViewModel
 fun WeatherRoute(
     screenTitle: Int,
 ) {
-    val viewModel : WeatherViewModelImpl = koinViewModel()
+    val viewModel : MainViewModelImpl = koinViewModel()
     val state by viewModel.weatherState.collectAsStateWithLifecycle()
 
     //preload weather from last time the app ran

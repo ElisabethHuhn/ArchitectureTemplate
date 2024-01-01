@@ -7,8 +7,8 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.huhn.architecturetemplate.datasource.remotedatasource.WeatherApiService
-import com.huhn.architecturetemplate.viewmodel.WeatherViewModelImpl
-import com.huhn.architecturetemplate.datasource.WeatherRepositoryImpl
+import com.huhn.architecturetemplate.viewmodel.MainViewModelImpl
+import com.huhn.architecturetemplate.datasource.MainRepositoryImpl
 
 
 /*
@@ -32,6 +32,6 @@ val koinModule = module {
             .create(WeatherApiService::class.java)
     }
 
-    singleOf(::WeatherRepositoryImpl)
-    viewModelOf(::WeatherViewModelImpl)
+    singleOf(::MainRepositoryImpl)
+    viewModelOf(::MainViewModelImpl)
 }

@@ -3,7 +3,7 @@ package com.huhn.architecturetemplate.viewmodel
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.huhn.architecturetemplate.datasource.WeatherRepositoryImpl
+import com.huhn.architecturetemplate.datasource.MainRepositoryImpl
 import com.huhn.architecturetemplate.ui.LocationState
 import com.huhn.architecturetemplate.ui.WeatherUIState
 import com.huhn.architecturetemplate.ui.WeatherUserEvent
@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class WeatherViewModelImpl(
-    private val repo : WeatherRepositoryImpl
+class MainViewModelImpl(
+    private val repo : MainRepositoryImpl
 ) : ViewModel()
 {
     //Define state for recomposing UI
