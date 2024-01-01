@@ -4,9 +4,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 
-//const val NUMBER_OF_FILE_ENTRIES = 20000
-//const val LOW_BRIGHTNESS = 10
-//const val HIGH_BRIGHTNESS = 250
 
 fun Context.getActivity(): ComponentActivity? {
     var currentContext = this
