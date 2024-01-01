@@ -2,8 +2,11 @@
 
 # Introduction
 
-This project is meant to be a starting point. It provides a rough framework for a state-of-the-art Android Compose Project.
-This readme file contains instructions for setting up a new project from this template.
+This project is meant to be a starting point. 
+It provides a rough template framework for a state-of-the-art Android Compose Project. 
+Start here and build your new project from this base.
+
+This readme file is a work in progress. Eventually it will contain instructions for setting up a new project from this template.
 
 # Architecture Notes
 The project is an example of State of the Art Android Architecture circa 2023. It uses:
