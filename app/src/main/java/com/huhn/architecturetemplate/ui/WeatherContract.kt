@@ -33,14 +33,14 @@ data class LocationState(
 )
 
 sealed interface WeatherUserEvent {
-    object OnInitializeWeatherEvent : WeatherUserEvent
+    data object OnInitializeWeatherEvent : WeatherUserEvent
     data class OnShowHideDetailsChanged(val data: Boolean = false) : WeatherUserEvent
     data class OnFetchLocation(val data: Location?) : WeatherUserEvent
     data class OnCityEvent(val data: String?) : WeatherUserEvent
     data class OnUsStateEvent (val data: String?) : WeatherUserEvent
     data class OnCountryEvent (val data: String?) : WeatherUserEvent
     data class OnDisplayWeatherEvent(val isByLoc: Boolean = false) : WeatherUserEvent
-    object OnGetLocation : WeatherUserEvent
+    data object OnGetLocation : WeatherUserEvent
     data class OnLatitudeEvent (val data: String): WeatherUserEvent
     data class OnLongitudeEvent (val data: String): WeatherUserEvent
 }
