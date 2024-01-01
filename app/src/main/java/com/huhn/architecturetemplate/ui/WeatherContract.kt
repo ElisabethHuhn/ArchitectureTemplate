@@ -1,6 +1,7 @@
 package com.huhn.architecturetemplate.ui
 
 import android.location.Location
+import com.google.android.gms.location.FusedLocationProviderClient
 
 
 data class WeatherUIState(
@@ -22,6 +23,13 @@ data class WeatherUIState(
     val sunrise : String = "",
     val sunset: String = "",
     val errorMsg: String = "",
+)
+
+data class LocationState(
+    val location: Location? = null,
+    val locLatitude : String = "0.0",
+    val locLongitude: String = "0.0",
+    val fusedClient : FusedLocationProviderClient? = null,
 )
 
 sealed interface WeatherUserEvent {

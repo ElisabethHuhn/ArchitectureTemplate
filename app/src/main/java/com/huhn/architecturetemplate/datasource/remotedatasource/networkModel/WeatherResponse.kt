@@ -1,6 +1,7 @@
 package com.huhn.architecturetemplate.datasource.remotedatasource.networkModel
 
 import com.huhn.architecturetemplate.datasource.localdatasource.dbModel.DBWeather
+import com.huhn.architecturetemplate.ui.WeatherUIState
 
 data class WeatherResponse(
     val base: String,
@@ -36,6 +37,25 @@ data class WeatherResponse(
             clouds = this.clouds.all,
             sunrise = this.sys.sunrise,
             sunset = this.sys.sunset,
+        )
+    }
+    fun convertToState() : WeatherUIState {
+        return WeatherUIState(
+            city = this.name,
+            usState = "",
+            country = this.sys.country,
+            latitude = this.coord.lat.toString(),
+            longitude = this.coord.lon.toString(),
+            description = this.weather.first().description,
+            icon = this.weather.first().icon,
+            temp = this.main.temp.toString(),
+            feelsLike = this.main.feelsLike.toString(),
+            tempMax = this.main.tempMax.toString(),
+            tempMin = this.main.tempMin.toString(),
+            dewTemp = this.dt.toString(),
+            clouds = this.clouds.all.toString(),
+            sunrise = this.sys.sunrise.toString(),
+            sunset = this.sys.sunset.toString()
         )
     }
 }
