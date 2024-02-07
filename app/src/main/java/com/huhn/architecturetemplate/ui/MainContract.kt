@@ -19,11 +19,33 @@ data class WeatherUIState(
     val feelsLike : String = "0.0",
     val tempMax: String = "0.0",
     val tempMin : String = "0.0",
-    val dewTemp : String = "0.0",
+    val calcTime : String = "0.0",
     val clouds: String = "",
     val sunrise : String = "",
     val sunset: String = "",
     val errorMsg: String = "",
+    val windDir : String = "",
+    val windSpeed : String = "",
+    val forecastState : List <ForecastUIState> = emptyList(),
+)
+
+data class ForecastUIState(
+    val dt : String = "",
+    val dt_txt : String = "",
+    val description : String = "",
+    val weatherStateId : String = "",
+    val icon : String = "",
+    val temp : String = "0.0",
+    val feelsLike : String = "0.0",
+    val tempMax: String = "0.0",
+    val tempMin : String = "0.0",
+    val calcTime : String = "0.0",
+    val clouds: String = "",
+    val sunrise : String = "",
+    val sunset: String = "",
+    val errorMsg: String = "",
+    val windDir : String = "",
+    val windSpeed : String = "",
 )
 
 data class LocationState(
@@ -35,12 +57,14 @@ data class LocationState(
 
 sealed interface WeatherUserEvent {
     data object OnInitializeWeatherEvent : WeatherUserEvent
+    data class OnDisplayWeatherEvent(val isByLoc: Boolean = false, val isForecast : Boolean = false) : WeatherUserEvent
+    data class OnDisplayLandingEvent(val isByLoc: Boolean = false, val isForecast : Boolean = false) : WeatherUserEvent
+    data class OnDisplayForecastEvent(val isByLoc: Boolean = false, val isForecast : Boolean = false) : WeatherUserEvent
     data class OnShowHideDetailsChanged(val data: Boolean = false) : WeatherUserEvent
     data class OnFetchLocation(val data: Location?) : WeatherUserEvent
     data class OnCityEvent(val data: String?) : WeatherUserEvent
     data class OnUsStateEvent (val data: String?) : WeatherUserEvent
     data class OnCountryEvent (val data: String?) : WeatherUserEvent
-    data class OnDisplayWeatherEvent(val isByLoc: Boolean = false) : WeatherUserEvent
     data class OnGetLocation(val context: Context) : WeatherUserEvent
     data class OnLatitudeEvent (val data: String): WeatherUserEvent
     data class OnLongitudeEvent (val data: String): WeatherUserEvent

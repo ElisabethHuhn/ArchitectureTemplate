@@ -29,13 +29,15 @@ class MainViewModelImpl(
     //Define responses to User Trigger Events
     fun onWeatherUserEvent (event: WeatherUserEvent){
         when(event) {
+            is WeatherUserEvent.OnDisplayWeatherEvent -> onDisplayWeather(event.isByLoc, event.isForecast)
+            is WeatherUserEvent.OnDisplayLandingEvent -> onDisplayLanding(event.isByLoc, event.isForecast)
+            is WeatherUserEvent.OnDisplayForecastEvent -> onDisplayForecast(event.isByLoc, event.isForecast)
             is WeatherUserEvent.OnInitializeWeatherEvent -> onInitialization()
             is WeatherUserEvent.OnShowHideDetailsChanged -> onInitializedChanged(event.data)
             is WeatherUserEvent.OnFetchLocation -> onLocationChanged(event.data)
             is WeatherUserEvent.OnCityEvent -> onCityChanged(event.data ?: "")
             is WeatherUserEvent.OnUsStateEvent -> onUsStateChanged(event.data ?: "")
             is WeatherUserEvent.OnCountryEvent -> onCountryChanged(event.data ?: "")
-            is WeatherUserEvent.OnDisplayWeatherEvent -> onDisplayWeather(event.isByLoc)
             is WeatherUserEvent.OnGetLocation ->  getCurrentLocation(event.context)  // onGetLocation()
             is WeatherUserEvent.OnLatitudeEvent -> onLatitudeChanged(event.data )
             is WeatherUserEvent.OnLongitudeEvent -> onLongitudeChanged(event.data )
@@ -72,7 +74,7 @@ class MainViewModelImpl(
         _weatherState.update { it.copy(errorMsg = data) }
     }
 
-    private fun getCurrentLocation(context: Context) {
+    fun getCurrentLocation(context: Context) {
         GpsMonitor.fetchCurrentLocation(context = context, this::onGpsUpdate)
         onLocationChanged(locationState.value.location )
     }
@@ -99,22 +101,39 @@ class MainViewModelImpl(
 
     fun onInitialization() {
         _weatherState.update { it.copy(
-            city = "Atlanta",
-            usState = "Georgia",
-            country = "USA",
-            latitude = "34.000",
-            longitude = "-84.9999",
-            description = "Nice weather today",
-            icon = "some_url",
-            temp = "73",
-            feelsLike = "80",
-            tempMax = "99",
-            tempMin = "65",
-            dewTemp = "70",
-            clouds = "50",
-            sunrise = "1000",
-            sunset = "2200"
+            city = "",    //"Atlanta",
+            usState = "",    //"Georgia",
+            country = "",
+            latitude = "",   //"33.7748",
+            longitude = "",      //"-84.296310",
+            description = "",
+            icon = "",
+            temp = "",
+            feelsLike = "",
+            tempMax = "",
+            tempMin = "",
+            calcTime = "",
+            clouds = "",
+            sunrise = "",
+            sunset = ""
         ) }
+//        _weatherState.update { it.copy(
+//            city = "Chautauqua",    //"Atlanta",
+//            usState = "NY",    //"Georgia",
+//            country = "USA",
+//            latitude = "42.2098",   //"33.7748",
+//            longitude = "-79.4668",      //"-84.296310",
+//            description = "Nice weather today",
+//            icon = "some_url",
+//            temp = "73",
+//            feelsLike = "80",
+//            tempMax = "99",
+//            tempMin = "65",
+//            calcTime = "70",
+//            clouds = "50",
+//            sunrise = "1000",
+//            sunset = "2200"
+//        ) }
     }
 
     //endregion
@@ -126,10 +145,40 @@ class MainViewModelImpl(
     /*
      * Makes data source calls and updates weather state with the weatherResponse
      */
-    private fun onDisplayWeather(isByLoc: Boolean) {
+    private fun onDisplayWeather(
+        isByLoc: Boolean,
+        isForecast: Boolean
+        ) {
         viewModelScope.launch {
             val weatherResponse = repo.getDisplayWeather(
                 isByLoc = isByLoc,
+                isForecast = isForecast,
+                weatherState = weatherState.value
+            )
+            weatherResponse?.let { onWeatherChanged(it) }
+        }
+    }
+    private fun onDisplayLanding(
+        isByLoc: Boolean,
+        isForecast: Boolean
+    ) {
+        viewModelScope.launch {
+            val weatherResponse = repo.getDisplayWeather(
+                isByLoc = isByLoc,
+                isForecast = isForecast,
+                weatherState = weatherState.value
+            )
+            weatherResponse?.let { onWeatherChanged(it) }
+        }
+    }
+    private fun onDisplayForecast(
+        isByLoc: Boolean,
+        isForecast: Boolean
+    ) {
+        viewModelScope.launch {
+            val weatherResponse = repo.getDisplayWeather(
+                isByLoc = isByLoc,
+                isForecast = isForecast,
                 weatherState = weatherState.value
             )
             weatherResponse?.let { onWeatherChanged(it) }

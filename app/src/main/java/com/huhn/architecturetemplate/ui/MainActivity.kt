@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -26,22 +23,34 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation : Location? = null
 
-    private var isLocationPermissionGranted = false
+    var isLocationPermissionGranted = false
     private val locationPermissionRequest =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
+            var msg = "Location permission must be granted to run app"
             when {
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, defaultValue = false ) -> {
+                permissions.getOrDefault(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    defaultValue = false
+                ) -> {
                     // Precise location access granted.
                     isLocationPermissionGranted = true
+                    msg = "Location permission granted"
                 }
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, defaultValue = false) -> {
+
+                permissions.getOrDefault(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    defaultValue = false
+                ) -> {
                     // Only approximate location access granted.
-                } else -> {
-                // No location access granted.
+                }
+
+                else -> {
+                    // No location access granted.
+                }
             }
-            }
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -58,12 +67,11 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainNavGraph()
-//                    Greeting("Android")
                 }
             }
         }
     }
-    private fun askLocationPermissions() {
+    fun askLocationPermissions() {
         // Before performing the actual permission request,
         // check whether app already has the permissions,
         if (!isLocationPermissionGranted) {
@@ -83,13 +91,6 @@ class MainActivity : ComponentActivity() {
                 isLocationPermissionGranted = true
             }
         }
-        if (!isLocationPermissionGranted) {
-            Toast.makeText(
-                this,
-                "Location permission must be granted to run app",
-                Toast.LENGTH_LONG
-            ).show()
-        }
 
         if (isLocationPermissionGranted) {
             Toast.makeText(this, "Location permission granted", Toast.LENGTH_LONG).show()
@@ -100,22 +101,9 @@ class MainActivity : ComponentActivity() {
                     // Got last known location. In some rare situations this can be null.
                     lastLocation = location
                 }
+        } else {
+            Toast.makeText(this, "Location permission must be granted to run app", Toast.LENGTH_LONG)
+                .show()
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ArchitectureTemplateTheme {
-        Greeting("Android")
     }
 }

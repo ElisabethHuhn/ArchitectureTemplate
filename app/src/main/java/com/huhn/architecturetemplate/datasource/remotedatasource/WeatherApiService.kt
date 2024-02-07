@@ -2,6 +2,7 @@ package com.huhn.architecturetemplate.datasource.remotedatasource
 
 // Retrofit interface
 import com.huhn.architecturetemplate.BuildConfig
+import com.huhn.architecturetemplate.datasource.remotedatasource.networkModel.ForecastResponse
 import com.huhn.architecturetemplate.datasource.remotedatasource.networkModel.WeatherResponse
 
 import retrofit2.http.GET
@@ -17,6 +18,7 @@ interface WeatherApiService {
     @GET("weather")
     suspend fun fetchWeatherCity(
         @Query("q") cityLocation : String,
+        @Query("units")  units: String = "imperial",
         @Query("appid")  apiKey: String = appKey
     ) : WeatherResponse
 
@@ -24,6 +26,24 @@ interface WeatherApiService {
     suspend fun fetchWeatherLatLng(
         @Query("lat")  latitude: Double,
         @Query("lon")  longitude: Double,
+        @Query("units")  units: String = "imperial",
         @Query("appid")  apiKey: String = appKey
     ) : WeatherResponse
+
+    @GET("forecast")
+    suspend fun fetchForecastCity(
+        @Query("q") cityLocation : String,
+//        @Query("cnt")  cnt: String = "5",
+        @Query("units")  units: String = "imperial",
+        @Query("appid")  apiKey: String = appKey
+    ) : ForecastResponse
+
+    @GET("forecast")
+    suspend fun fetchForecastLatLng(
+        @Query("lat")  latitude: Double,
+        @Query("lon")  longitude: Double,
+        @Query("units")  units: String = "imperial",
+//        @Query("cnt")  cnt: String = "5",
+        @Query("appid")  apiKey: String = appKey
+    ) : ForecastResponse
 }

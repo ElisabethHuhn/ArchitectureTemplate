@@ -51,8 +51,9 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeatherRoute(
+fun ForecastRoute(
     screenTitle: Int,
+    navigateToLanding: () -> Unit
 ) {
     val viewModel : MainViewModelImpl = koinViewModel()
     val state by viewModel.weatherState.collectAsStateWithLifecycle()
@@ -63,22 +64,23 @@ fun WeatherRoute(
         viewModel.onWeatherUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = false, isForecast = false))
    }
 
-    WeatherScreen (
+    ForecastScreen (
         screenTitle = screenTitle,
         state = state,
         onUserEvent = viewModel::onWeatherUserEvent,
+        navigateToLanding = navigateToLanding
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalMaterial3Api
 @Composable
-fun WeatherScreen(
+fun ForecastScreen(
     screenTitle : Int,
     state: WeatherUIState,
     onUserEvent: (WeatherUserEvent) -> Unit,
+    navigateToLanding: () -> Unit
 ) {
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(

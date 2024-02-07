@@ -20,13 +20,28 @@ data class DBWeather(
     @ColumnInfo(name = "feelslike") val feelslike: Double,
     @ColumnInfo(name = "tempmax") val tempmax: Double,
     @ColumnInfo(name = "tempmin") val tempmin: Double,
-    @ColumnInfo(name = "dewtemp") val dewtemp: Int,
+    @ColumnInfo(name = "dewtemp") val calcTime: Int,
     @ColumnInfo(name = "clouds") val clouds: Int,
     @ColumnInfo(name = "sunrise") val sunrise: Int,
     @ColumnInfo(name = "sunset") val sunset: Int,
+    @ColumnInfo(name = "windDir") val windDir: Int,
+    @ColumnInfo(name = "windSpeed") val windSpeed: Double
 )
 {
     fun convertToState() : WeatherUIState {
+        val windDirCompass = when (this.windDir) {
+            in 0..22 ->  "N"
+            in 23..67 ->  "NE"
+            in 68..112 ->  "E"
+            in 113..157 ->  "SE"
+            in 158..202 ->  "S"
+            in 203..247 ->  "SW"
+            in 248..292 ->  "W"
+            in 293..337 ->  "NW"
+            in 338..360 ->  "N"
+            else -> "N"
+        }
+
         return WeatherUIState(
             city = this.city,
             usState = this.state,
@@ -39,10 +54,12 @@ data class DBWeather(
             feelsLike = this.feelslike.toString(),
             tempMax = this.tempmax.toString(),
             tempMin = this.tempmin.toString(),
-            dewTemp = this.dewtemp.toString(),
+            calcTime = this.calcTime.toString(),
             clouds = this.clouds.toString(),
             sunrise = this.sunrise.toString(),
-            sunset = this.sunset.toString()
+            sunset = this.sunset.toString(),
+            windDir = windDirCompass,
+            windSpeed = this.windSpeed.toString()
         )
     }
 }

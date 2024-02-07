@@ -30,16 +30,30 @@ data class WeatherResponse(
             icon = this.weather.first().icon,
             weatherStateId = this.weather.first().id.toString(),
             temp = this.main.temp ,
-            feelslike = this.main.feelsLike,
-            tempmax = this.main.tempMax,
-            tempmin = this.main.tempMin,
-            dewtemp = this.dt,
+            feelslike = this.main.feels_like,
+            tempmax = this.main.temp_max,
+            tempmin = this.main.temp_min,
+            calcTime = this.dt,
             clouds = this.clouds.all,
             sunrise = this.sys.sunrise,
             sunset = this.sys.sunset,
+            windDir = this.wind.deg,
+            windSpeed = this.wind.speed
         )
     }
     fun convertToState() : WeatherUIState {
+        val windDirCompass = when (this.wind.deg) {
+            in 0..22 ->  "N"
+            in 23..67 ->  "NE"
+            in 68..112 ->  "E"
+            in 113..157 ->  "SE"
+            in 158..202 ->  "S"
+            in 203..247 ->  "SW"
+            in 248..292 ->  "W"
+            in 293..337 ->  "NW"
+            in 338..360 ->  "N"
+            else -> "N"
+        }
         return WeatherUIState(
             city = this.name,
             usState = "",
@@ -49,13 +63,15 @@ data class WeatherResponse(
             description = this.weather.first().description,
             icon = this.weather.first().icon,
             temp = this.main.temp.toString(),
-            feelsLike = this.main.feelsLike.toString(),
-            tempMax = this.main.tempMax.toString(),
-            tempMin = this.main.tempMin.toString(),
-            dewTemp = this.dt.toString(),
+            feelsLike = this.main.feels_like.toString(),
+            tempMax = this.main.temp_max.toString(),
+            tempMin = this.main.temp_min.toString(),
+            calcTime = this.dt.toString(),
             clouds = this.clouds.all.toString(),
             sunrise = this.sys.sunrise.toString(),
-            sunset = this.sys.sunset.toString()
+            sunset = this.sys.sunset.toString(),
+            windDir = windDirCompass,
+            windSpeed = this.wind.speed.toString()
         )
     }
 }
