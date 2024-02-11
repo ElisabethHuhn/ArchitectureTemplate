@@ -53,7 +53,7 @@ android {
         applicationId = "com.huhn.architecturetemplate"
         // testApplicationId "com.huhn.architecturetemplate.test"
 
-        minSdk = 24 //specifies the lowest version of Android that the app will run on
+        minSdk = 26 //specifies the lowest version of Android that the app will run on
         /*
          * targetSdk attests which version of Android you've tested against
          * must be <= the value of compileSdk.
@@ -191,7 +191,7 @@ dependencies {
 
 
     //koin
-    implementation ("io.insert-koin:koin-androidx-compose:3.4.6")
+    implementation ("io.insert-koin:koin-androidx-compose:3.5.3")
 
     //ROOM
     implementation("androidx.room:room-runtime:2.6.1")
@@ -205,7 +205,13 @@ dependencies {
 
 
     //fused location provider
-    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("com.google.android.gms:play-services-location:21.1.0")
+
+    //kotlin coroutines
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

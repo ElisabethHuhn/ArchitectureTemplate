@@ -6,6 +6,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 
 
 data class WeatherUIState(
+    val isRefreshing: Boolean = false,
     var isInitialized: Boolean = false,
     val city : String = "",
     val usState : String = "",
@@ -32,13 +33,13 @@ data class WeatherUIState(
 data class ForecastUIState(
     val dt : String = "",
     val dt_txt : String = "",
-    val description : String = "",
+    var description : String = "",
     val weatherStateId : String = "",
-    val icon : String = "",
+    var icon : String = "",
     val temp : String = "0.0",
     val feelsLike : String = "0.0",
-    val tempMax: String = "0.0",
-    val tempMin : String = "0.0",
+    var tempMax: String = "0.0",
+    var tempMin : String = "0.0",
     val calcTime : String = "0.0",
     val clouds: String = "",
     val sunrise : String = "",
@@ -48,12 +49,12 @@ data class ForecastUIState(
     val windSpeed : String = "",
 )
 
-data class LocationState(
-    val location: Location? = null,
-    val locLatitude : String = "0.0",
-    val locLongitude: String = "0.0",
-    val fusedClient : FusedLocationProviderClient? = null,
-)
+//data class LocationState(
+//    val location: Location? = null,
+//    val locLatitude : String = "0.0",
+//    val locLongitude: String = "0.0",
+//    val fusedClient : FusedLocationProviderClient? = null,
+//)
 
 sealed interface WeatherUserEvent {
     data object OnInitializeWeatherEvent : WeatherUserEvent
@@ -61,7 +62,7 @@ sealed interface WeatherUserEvent {
     data class OnDisplayLandingEvent(val isByLoc: Boolean = false, val isForecast : Boolean = false) : WeatherUserEvent
     data class OnDisplayForecastEvent(val isByLoc: Boolean = false, val isForecast : Boolean = false) : WeatherUserEvent
     data class OnShowHideDetailsChanged(val data: Boolean = false) : WeatherUserEvent
-    data class OnFetchLocation(val data: Location?) : WeatherUserEvent
+//    data class OnFetchLocation(val data: Location?) : WeatherUserEvent
     data class OnCityEvent(val data: String?) : WeatherUserEvent
     data class OnUsStateEvent (val data: String?) : WeatherUserEvent
     data class OnCountryEvent (val data: String?) : WeatherUserEvent

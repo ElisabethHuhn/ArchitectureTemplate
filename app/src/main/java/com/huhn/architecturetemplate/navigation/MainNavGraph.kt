@@ -81,8 +81,9 @@ fun MainNavGraph(){
             route = ForecastDestination.route,
         ){
             ForecastRoute(
-                screenTitle = LandingDestination.title,
+                screenTitle = ForecastDestination.title,
                 navigateToLanding = { navController.navigateToLanding() },
+                navController = navController
             )
         }
     }

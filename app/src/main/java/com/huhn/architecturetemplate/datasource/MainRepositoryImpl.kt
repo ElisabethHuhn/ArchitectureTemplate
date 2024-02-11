@@ -16,6 +16,7 @@ interface MainRepository {
     suspend fun getWeather(
         isByLoc: Boolean,
         isForecast: Boolean,
+        isTodayOnly: Boolean,
         latitude: String?,
         longitude: String?,
         city: String?,
@@ -52,11 +53,13 @@ class MainRepositoryImpl(
     suspend fun getDisplayWeather(
         isByLoc: Boolean,
         isForecast: Boolean,
+        isTodayOnly: Boolean,
         weatherState: WeatherUIState
     ) : WeatherUIState? {
         return getWeather(
             isByLoc = isByLoc,
             isForecast = isForecast,
+            isTodayOnly = isTodayOnly,
             latitude = weatherState.latitude,
             longitude = weatherState.longitude,
             city = weatherState.city,
@@ -68,6 +71,7 @@ class MainRepositoryImpl(
     override suspend fun getWeather(
         isByLoc: Boolean,
         isForecast: Boolean,
+        isTodayOnly: Boolean,
         latitude: String?,
         longitude: String?,
         city: String?,
@@ -102,6 +106,7 @@ class MainRepositoryImpl(
                 weatherUIState = getWeatherRemote(
                     isByLoc = isByLoc,
                     isForecast = isForecast,
+                    isTodayOnly = isTodayOnly,
                     latitude = lat,
                     longitude = lng,
                     city = city,
@@ -119,14 +124,15 @@ class MainRepositoryImpl(
     private fun getWeatherLocal() : WeatherUIState? {
         //for now, get rid of caching
 //        val weather = dbWeatherDao.findWeatherById(weatherId = 1)
-        val weather : DBWeather? = null
         //convert DB Weather into WeatherUIState
-        return weather?.convertToState()
+//        return weather?.convertToState()
+        return null //No DB for now
     }
 
     private suspend fun getWeatherRemote(
         isByLoc: Boolean,
         isForecast: Boolean,
+        isTodayOnly: Boolean,
         latitude: Double?,
         longitude: Double?,
         city: String?,
@@ -164,7 +170,7 @@ class MainRepositoryImpl(
 //                    dbWeatherDao.insertWeather(weather = dbWeather)
 //                }
 
-                forcecastResponse?.convertToState(0)
+                forcecastResponse?.convertToState(position = 0, isTodayOnly = isTodayOnly)
             }
             else {
                 val weatherResponse : WeatherResponse? =

@@ -2,11 +2,12 @@
 
 # Introduction
 
-This project is meant to be a starting point. 
-It provides a rough template framework for a state-of-the-art Android Compose Project. 
-Start here and build your new project from this base.
+This project is a specific example of using the template as a starting point.
 
-This readme file is a work in progress. Eventually it will contain instructions for setting up a new project from this template.
+# Discussion
+
+I was actually not terribly happy with the results of using this template. 
+The architecture ended up being convoluted with a lot of tech debt that needs to be cleaned up.
 
 # Architecture Notes
 The project is an example of State of the Art Android Architecture circa 2023. It uses:
@@ -39,78 +40,112 @@ The project is an example of State of the Art Android Architecture circa 2023. I
     * Compose UI testing
         * reference https://developer.android.com/codelabs/jetpack-compose-testing#0
 
-# How to use the template
 
-## Create a new project from the template
-* Goto [GotHub](https://github.com/ElisabethHuhn/ArchitectureTemplate/tree/master) 
-* **Needs more here**
-* Enter a name for your new project
-* Click on the green "Create repository from template" button
 
-##  Update the package name
+# Architecture and its Effects on Testing
+I initially wrote this app with an MVVM architecture,
+as that was the direct requirement. But as I learned more about MVI I rewrote the app.
+And the experience has taught me that MVI is clearly superior.
+One file, ScreenContract.kt, tells you everything you need to know to unit test the corresponding Screen.
+Testing the UI, ViewModel, Repository and local/remote data sources is straightforward, and obvious from the Architecture.
 
-* In Android Studio, right click on the package name in the Project pane
-* Select Refactor -> Rename
-* Enter the new package name
-* Click on the Refactor button
+# Justification for odd screen layout
+Unfortunately, Compose does odd things with the UI component tree if there are if statements in the LazyColumn.
+For example, all items following the if statement are duplicated.
+For now, I've just punted and put all the if statements at the end of the column.
 
-## Update the app name
-* Manually:
-* In Android Studio, open the AndroidManifest.xml file
-* Change to the new name the:
-  * android:label attribute of the application tag 
-  * activity tag
-  * activity-alias tag
-  * meta-data tag
-  * provider tag
-  * receiver tag
-  * service tag
-  * uses-library tag
-  * uses-permission tag
-  * uses-permission-sdk-23 tag
-  * uses-static-library tag
-  * uses-feature tag
-  * uses-sdk tag
-  * uses-configuration tag
-  * uses-gl-es tag
-* Use the plugin: Android Package Renamer
-  * https://plugins.jetbrains.com/plugin/10009-android-package-renamer
-  *
-*
+# Automated Testing
+Writing and maintaining automated testing is clearly costly.
+But the potential for payback ROI is obvious.
+Regression testing is performed consistently and repeatedly.
+The earlier you find a bug, the cheaper it is to fix.
+Thus, a bug found by a developer is cheaper than that same bug found in QA.
+Automated testing finds bugs earlier in the process,
+and this savings more than covers the cost of creating and maintaining automated testing.
+However even more than that, an architecture that is designed to be testable is also less likely to have bugs in the first place.  
+With a good architecture you can avoid a whole class of bugs entirely.
+A testable architecture is easier to maintain, thus justifying the cost of creating and maintaining automated testing.
 
-## Update secrets
-* add secret to local.properties
-* Load the secret from BuildConfig
+MVI allows for a greater separation of concerns over MVVM, and thus an easier isolation of code, leading to higher quality testing.
+MVI allows for the tracking of user event occurrence resulting in UI state change.
 
-## Update Dependency Injection i.e. Koin
+## To run automated tests:
+I ran the automated tests from Android Studio:
 
-## Update Permissions
+* ViewModel, run the tests in DriverViewModelTest
+* Repository, run the tests in DriverRepositoryTest
+* Smoke test the UI, run the tests in TestDriverComposeUI and TestRouteComposeUI
 
-## Change UI
-* Add new UI ScreenRoute files under UI package
-  * Replace WeatherRoute with your new screen
-* Update NavGraph to add new screens
-* Call the appropriate UI compose function from MainActivity
-* Update MainContract
+## ViewModel Testing Strategy
+The only things publicly visible from the ViewModel are:
+* Screen State
+* onUserEvent() function, which takes a UserEvent and updates the ScreenState accordingly
+* Any user action functions that are exposed on the UI.
+  * These include lambdas that must be passed on,
+  * such as actions passed to GoogleMaps when a marker is selected, etc.
 
-## Update ViewModel
-* Add new ViewModel files under ViewModel package
-  * Replace WeatherViewModel with your new ViewModel
+Thus the ViewModel can be tested by initializing a state value, simulating a user event, and making assertions about the final state
 
-## Update Repository
+### ViewModel testing Notes
+* Arrange
+  * Initialize the ViewModel with a fake repository class and a known state
+* Act
+  * Call the onUserEvent() function with the known UserEvent
+* Assert
+  * Make assertions about the final state
 
-* Add new Repository files under Repository package
-  * Replace WeatherRepository with your new Repository
-  * Replace WeatherRepositoryImpl with your new RepositoryImpl
-  * Replace WeatherRepositoryImplTest with your new RepositoryImplTest
-  * Replace WeatherRepositoryImplInstrumentedTest with your new RepositoryImplInstrumentedTest
+## Repository Testing Strategy
+The only things publicly visible from the Repository are:
+* Fetch the forecast and update the UI state depending upon whether the Landing or 
+the Forecast screen is being displayed
+  * Initial fetch is from the local DB
+  * If the local DB is empty, then fetch from the remote API
+* Delete all Drivers and Routes from the local DB
 
-## Update Data Source
+So the Repository can be tested by initializing the local DB (both empty and with known values),
+then fetching the lists of Drivers and Routes, and making assertions about the final state.
 
-## Update Data Model
+## UI Testing Strategy
+Once the ViewModel and Repository are tested, the UI testing can be to simply automate the smoke test of the App.
+Compose gives us the ability to test that the UI is properly displaying the expected state.
+The easiest way to test that an element is on the UI is to assign testTags to the UI elements,
+then find those testTags in the UI test. Thus, all of the compose elements have testTags assigned to them.
 
-## Update Network i.e. Retrofit
+However, it is never easy. Compose seems to duplicate nodes when there is an if statement governing the items of a LazyColumn.
+So relying on the testTag to find the element in the UI test is not a bullet-proof strategy.
+I got around this by putting all the if statements at the end of the LazyColumn, but it makes for a stilted UI.
 
-## Update Local Storage i.e. Room
 
-## Update Unit Tests
+### Smoke Test Script:
+
+The smoke test is a quick test that assures the app is displaying the expected UI state.
+
+# Near Exhaustive list of Testing Types
+This app only illustrates a few of the many types of testing that can be performed on an app.
+* Functional - Does it do what the requirements say it should do
+* Non-functional - Performance, Capacity, Throughput, Power consumption, network reception
+* Android UI
+  * component visibility
+  * user interaction (event detection and response actions conform to requirements)
+* Device Compatibility
+  * OS version
+  * Device Model
+  * Screen Size
+  * Screen Resolution
+  * Network Connectivity
+* Integration Testing
+* Network Testing
+  * Connectivity
+  * Intermittent reception
+  * Field testing with Mobile Data Network
+* Installation Testing
+* Security Testing
+* Bucket or A/B testing
+
+
+
+
+
+
+
+

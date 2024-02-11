@@ -43,6 +43,7 @@ data class DBWeather(
         }
 
         return WeatherUIState(
+            isRefreshing = false,
             city = this.city,
             usState = this.state,
             country = this.country,

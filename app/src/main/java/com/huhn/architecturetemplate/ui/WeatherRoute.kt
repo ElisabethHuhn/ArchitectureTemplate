@@ -269,45 +269,6 @@ fun WeatherScreen(
                     Text(text = "Min:", fontWeight = FontWeight.Bold)
                     Text(text = state.tempMin, modifier = Modifier)
             }
-//***************************************************************************************************
-            Text(text = "*************************************", fontWeight = FontWeight.Bold)
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                    Text(text = state.city,)
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Wind:", fontWeight = FontWeight.Bold)
-
-//                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = "Temperature", fontWeight = FontWeight.Bold)
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = state.windDir)
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = "Feels Like ${state.feelsLike}")
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "${state.windSpeed} mph")
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = state.temp)
-            }
-// ****************************************************************************************
-
         }
     }
 }

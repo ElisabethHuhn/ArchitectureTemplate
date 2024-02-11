@@ -2,8 +2,8 @@
     <string name="app_name">ArchitectureTemplate</string>
 
     <string name="weather_title">Weather Title</string>
-    <string name="landing_title">Landing Title</string>
-    <string name="forecast_title">Forecast Title</string>
+    <string name="landing_title">Landing Screen</string>
+    <string name="forecast_title">Forecast Screen</string>
     <string name="weather">Weather</string>
     <string name="home">Home</string>
     <string name="forecast">Forecast</string>

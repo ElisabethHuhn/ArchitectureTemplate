@@ -55,6 +55,7 @@ data class WeatherResponse(
             else -> "N"
         }
         return WeatherUIState(
+            isRefreshing = false,
             city = this.name,
             usState = "",
             country = this.sys.country,

@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.huhn.architecturetemplate.utils.getActivity
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 
 class GpsMonitor {
     companion object {
@@ -72,6 +74,7 @@ class GpsMonitor {
 
                     val scope = CoroutineScope(Dispatchers.IO)
                     scope.launch {
+//                    runBlocking {
                         val result = fusedLocationClient.getCurrentLocation(
                             priority,
                             null, // cancellationToken,
@@ -95,6 +98,7 @@ class GpsMonitor {
                             onGpsUpdate(getNullLocation())
                         }
                     }
+
                 }
             }
         }

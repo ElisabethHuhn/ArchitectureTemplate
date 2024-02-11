@@ -1,31 +1,35 @@
 package com.huhn.architecturetemplate.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -33,19 +37,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.huhn.architecturetemplate.R
+import com.huhn.architecturetemplate.navigation.ForecastDestination
+import com.huhn.architecturetemplate.navigation.LandingDestination
+import com.huhn.architecturetemplate.utils.convertEpochToDayMonth
+import com.huhn.architecturetemplate.utils.getActivity
+import com.huhn.architecturetemplate.utils.roundTemp
 import com.huhn.architecturetemplate.viewmodel.MainViewModelImpl
 import org.koin.androidx.compose.koinViewModel
 
@@ -53,22 +62,25 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ForecastRoute(
     screenTitle: Int,
-    navigateToLanding: () -> Unit
+    navigateToLanding: () -> Unit,
+    navController: NavController
 ) {
     val viewModel : MainViewModelImpl = koinViewModel()
     val state by viewModel.weatherState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     //preload weather from last time the app ran
     LaunchedEffect(key1 = "firsttime" ){
         viewModel.onInitialization()
-        viewModel.onWeatherUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = false, isForecast = false))
+        viewModel.getCurrentForecastLocation(context)
    }
 
     ForecastScreen (
         screenTitle = screenTitle,
         state = state,
         onUserEvent = viewModel::onWeatherUserEvent,
-        navigateToLanding = navigateToLanding
+        navigateToLanding = navigateToLanding,
+        navController = navController,
     )
 }
 
@@ -79,8 +91,14 @@ fun ForecastScreen(
     screenTitle : Int,
     state: WeatherUIState,
     onUserEvent: (WeatherUserEvent) -> Unit,
-    navigateToLanding: () -> Unit
+    navigateToLanding: () -> Unit,
+    navController: NavController
 ) {
+    // Navigation bar list
+    val navItems = listOf(
+        LandingDestination,
+        ForecastDestination,
+    )
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -95,221 +113,159 @@ fun ForecastScreen(
                 },
             )
         },
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                content = { Text(text = "FAB")},
-//                onClick = {
-//                    /*TODO Do something here if have FAB */
-//
-//                },
-//                shape = RectangleShape,
-//            )
-//        }
+        bottomBar = {
+            BottomNavigation(
+                backgroundColor = Color(0xFF008D75),
+                contentColor = Color.White
+            ) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                navItems.forEach { screen ->
+                    val icon = if (screen.route == "forecast_screen") {
+                        Icons.Filled.DateRange
+                    } else {
+                        Icons.Filled.Home
+                    }
+                    BottomNavigationItem(
+                        icon = { Icon(icon, contentDescription = null) },
+                        label = { Text(stringResource(screen.navLabel)) },
+                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        },
 
     ) {it
 
-        val keyboardController = LocalSoftwareKeyboardController.current
         val context = LocalContext.current
+        val activity : MainActivity = context.getActivity() as MainActivity
+        var locPermissionRequested: Boolean by remember { mutableStateOf(false) }
+        val locPermissionGranted: Boolean by remember { mutableStateOf(activity.isLocationPermissionGranted) }
 
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxSize(1f)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceEvenly,
+                .fillMaxWidth(1f)
+                .testTag(tag = "landing_screen"),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(95.0.dp))
-
-            //city row
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .weight(1.0f)
-                        .semantics { this.contentDescription = "city field" },
-                    value = state.city,
-                    onValueChange = { enteredText ->
-                        onUserEvent(WeatherUserEvent.OnCityEvent(enteredText))
-                        keyboardController?.hide()
-                    },
-                    label = { Text("City") },
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                TextField(
-                    modifier = Modifier.weight(.8f),
-                    value = state.usState,
-                    onValueChange = { enteredText ->
-                        onUserEvent(WeatherUserEvent.OnUsStateEvent(enteredText))
-                        keyboardController?.hide()
-                    },
-                    label = { Text("US State") }
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                TextField(
-                    modifier = Modifier.weight(.8f),
-                    value = state.country,
-                    onValueChange = { enteredText ->
-                        onUserEvent(WeatherUserEvent.OnCountryEvent(enteredText))
-                        keyboardController?.hide()
-                    },
-                    label = { Text("Country") }
-                )
-            }
-
-            val textMsg = state.errorMsg
-            Text(
-                modifier = Modifier
-                    .testTag("error_field")
-                    .semantics { this.contentDescription = "error field" },
-                text = textMsg
-            )
-
-            Button(
-                onClick = {
-                    onUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = false, isForecast = false))
-                    onUserEvent(WeatherUserEvent.OnShowHideDetailsChanged(data = true))
-                })
-            {
-                Text(text = "Get Weather by City")
-            }
-
-
-            //location row
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextField(
-                    modifier = Modifier.weight(1f),
-                    value = state.latitude,
-                    onValueChange = { enteredText ->
-                        onUserEvent(WeatherUserEvent.OnLatitudeEvent(enteredText))
-                        keyboardController?.hide()
-                    },
-                    label = { Text("Latitude") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                TextField(
-                    modifier = Modifier.weight(1f),
-                    value = state.longitude,
-                    onValueChange = { enteredText ->
-                        onUserEvent(WeatherUserEvent.OnLongitudeEvent(enteredText))
-                        keyboardController?.hide()
-                    },
-                    label = { Text("Longitude") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                )
-            }
-            Button(
-                onClick = {
-                    onUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = true, isForecast = false))
-                    onUserEvent(WeatherUserEvent.OnShowHideDetailsChanged(data = true))
-                })
-            {
-                Text(text = "Get Weather by Location")
-            }
-
-            Button(
-                onClick = {
-                    onUserEvent(WeatherUserEvent.OnGetLocation(context))
-                    onUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = true, isForecast = false))
-                    onUserEvent(WeatherUserEvent.OnShowHideDetailsChanged(data = true))
-                })
-            {
-                Text(text = "Current Location")
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                AsyncImage(
-                    model = "https://openweathermap.org/img/wn/${state.icon}@2x.png",
-                    placeholder = painterResource(id = R.drawable.ic_android_black_24dp),
-                    error = painterResource(id = R.drawable.ic_android_black_24dp),
-                    contentDescription = "An icon suggesting weather description",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .border(
-                            BorderStroke(5.dp, Color.Gray),
-                            RectangleShape
-                        )
-                )
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(
-                    modifier = Modifier
-                        .testTag("description_field"),
-                    text = state.description
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text(text = "Temperature:", fontWeight = FontWeight.Bold)
-                Text(text = "${state.temp} F")
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = "Feels Like:", fontWeight = FontWeight.Bold)
-                Text(text = state.feelsLike, modifier = Modifier)
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                    Text(text = "Max:", fontWeight = FontWeight.Bold)
-                    Text(text = state.tempMax, modifier = Modifier)
-                    Spacer(modifier = Modifier.width(5.0.dp))
-                    Text(text = "Min:", fontWeight = FontWeight.Bold)
-                    Text(text = state.tempMin, modifier = Modifier)
+            item {
+                Spacer(modifier = Modifier.height(95.0.dp))
             }
 //***************************************************************************************************
-            Text(text = "*************************************", fontWeight = FontWeight.Bold)
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                    Text(text = state.city,)
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Wind:", fontWeight = FontWeight.Bold)
+            if (locPermissionGranted) {
 
-//                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = "Temperature", fontWeight = FontWeight.Bold)
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = state.windDir)
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = "Feels Like ${state.feelsLike}")
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "${state.windSpeed} mph")
-                Spacer(modifier = Modifier.width(5.0.dp))
-                Text(text = state.temp)
-            }
-// ****************************************************************************************
+                items(state.forecastState.size) { position ->
+                    val forecast = state.forecastState[position]
+                    Spacer(modifier = Modifier.height(5.0.dp))
+//                    Row(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .background(Color(0xFF008D75))
+//                            .padding(start = 20.dp, end = 20.dp),
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF008D75))
+                                .padding(start = 20.dp, end = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            val time = convertEpochToDayMonth(epoch = forecast.dt.toLong() * 1000)
+                            Text(text = time, color = Color.Black)
+                        }
+                        Spacer(modifier = Modifier.width(40.0.dp))
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF008D75))
+                                .padding(start = 20.dp, end = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "High Temp: ${roundTemp( forecast.tempMax)}\u00B0 F", color = Color.Black)
+                            Spacer(modifier = Modifier.width(5.0.dp))
+                            Text(text = "Wind Speed", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.width(5.0.dp))
+                            AsyncImage(
+                                model = "https://openweathermap.org/img/wn/${forecast.icon}@2x.png",
+                                placeholder = painterResource(id = R.drawable.ic_android_black_24dp),
+                                error = painterResource(id = R.drawable.ic_android_black_24dp),
+                                contentDescription = "An icon suggesting weather description",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .border(
+                                        BorderStroke(5.dp, Color.Gray),
+                                        RectangleShape
+                                    )
+                            )
+                        }
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF008D75))
+                                .padding(start = 20.dp, end = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Low Temp: ${roundTemp( forecast.tempMin)}\u00B0 F", color = Color.Black)
+                            Spacer(modifier = Modifier.width(5.0.dp))
+                            Text(text = "${state.windSpeed} mph", color = Color.Black)
+                            Spacer(modifier = Modifier.width(5.0.dp))
+                            Text(text = forecast.description, fontSize = 12.sp, color = Color.Black)
+                        }
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF008D75))
+                                .padding(start = 20.dp, end = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
 
+                            Text(text = state.windDir, color = Color.Black)
+                        }
+
+                }
+            } else {
+                item {
+                    Spacer(modifier = Modifier.height(95.0.dp))
+                    Text(text = "Location permission must be granted to run app")
+                }
+                item {
+                    if (locPermissionRequested) {
+                        Text(text = "Please uninstall/reinstall app")
+                    } else {
+                        Button(
+                            onClick = {
+                                locPermissionRequested = true
+                                activity.askLocationPermissions()
+                            })
+                        {
+                            Text(text = "Grant Location Permissions")
+                        }
+                    }
+                }
+            }
         }
     }
 }

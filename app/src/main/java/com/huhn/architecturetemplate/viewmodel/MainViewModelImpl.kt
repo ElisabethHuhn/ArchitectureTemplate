@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.huhn.architecturetemplate.datasource.MainRepositoryImpl
 import com.huhn.architecturetemplate.gps.GpsMonitor
-import com.huhn.architecturetemplate.ui.LocationState
 import com.huhn.architecturetemplate.ui.WeatherUIState
 import com.huhn.architecturetemplate.ui.WeatherUserEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +22,8 @@ class MainViewModelImpl(
     private val _weatherState = MutableStateFlow(WeatherUIState())
     val weatherState = _weatherState.asStateFlow()
 
-    private val _locationState  = MutableStateFlow( LocationState())
-    val locationState = _locationState.asStateFlow()
+//    private val _locationState  = MutableStateFlow( LocationState())
+//    val locationState = _locationState.asStateFlow()
 
     //Define responses to User Trigger Events
     fun onWeatherUserEvent (event: WeatherUserEvent){
@@ -34,7 +33,7 @@ class MainViewModelImpl(
             is WeatherUserEvent.OnDisplayForecastEvent -> onDisplayForecast(event.isByLoc, event.isForecast)
             is WeatherUserEvent.OnInitializeWeatherEvent -> onInitialization()
             is WeatherUserEvent.OnShowHideDetailsChanged -> onInitializedChanged(event.data)
-            is WeatherUserEvent.OnFetchLocation -> onLocationChanged(event.data)
+//            is WeatherUserEvent.OnFetchLocation -> onLocationChanged(event.data)
             is WeatherUserEvent.OnCityEvent -> onCityChanged(event.data ?: "")
             is WeatherUserEvent.OnUsStateEvent -> onUsStateChanged(event.data ?: "")
             is WeatherUserEvent.OnCountryEvent -> onCountryChanged(event.data ?: "")
@@ -76,28 +75,60 @@ class MainViewModelImpl(
 
     fun getCurrentLocation(context: Context) {
         GpsMonitor.fetchCurrentLocation(context = context, this::onGpsUpdate)
-        onLocationChanged(locationState.value.location )
+//        onLocationChanged(locationState.value.location )
+    }
+    fun getCurrentForecastLocation(context: Context) {
+        GpsMonitor.fetchCurrentLocation(context = context, this::onGpsForecastUpdate)
+//        onLocationChanged(locationState.value.location )
     }
 
-    private fun onGpsUpdate (currentLocation: Location) =
-        _locationState.update {
-            it.copy(location = currentLocation)
+    private fun onGpsUpdate (currentLocation: Location)  {
+        val oldLatitude = _weatherState.value.latitude
+        val oldLongitude = _weatherState.value.longitude
+//        _locationState.update {
+//            it.copy(location = currentLocation)
+//        }
+//        onLocationChanged(currentLocation )
+
+        _weatherState.update {
+            it.copy(
+                latitude = currentLocation.latitude.toString(),
+                longitude = currentLocation.longitude.toString()
+            )
         }
+        if (oldLatitude != currentLocation.latitude.toString() || oldLongitude != currentLocation.longitude.toString()) {
+            onDisplayLanding(isByLoc = true, isForecast = true)
+        }
+    }
+    private fun onGpsForecastUpdate (currentLocation: Location)  {
+        val oldLatitude = _weatherState.value.latitude
+        val oldLongitude = _weatherState.value.longitude
+//        _locationState.update {
+//            it.copy(location = currentLocation)
+//        }
+//        onLocationChanged(currentLocation )
 
-    private fun onLocationChanged(location: Location?) {
-        onLocLatitudeChanged(data = location?.latitude.toString() )
-        onLocLongitudeChanged(data = location?.longitude.toString() )
+        _weatherState.update {
+            it.copy(
+                latitude = currentLocation.latitude.toString(),
+                longitude = currentLocation.longitude.toString()
+            )
+        }
+        if (oldLatitude != currentLocation.latitude.toString() || oldLongitude != currentLocation.longitude.toString()) {
+            onDisplayForecast(isByLoc = true, isForecast = true)
+        }
     }
-    private fun onLocLatitudeChanged(data: String) {
-        _locationState.update { it.copy(locLatitude = data) }
-    }
-    private fun onLocLongitudeChanged(data: String) {
-        _locationState.update { it.copy(locLongitude = data) }
-    }
-    private fun onGetLocation() {
-        onLatitudeChanged(data = locationState.value.locLatitude)
-        onLongitudeChanged(data = locationState.value.locLongitude)
-    }
+
+//    private fun onLocationChanged(location: Location?) {
+//        onLocLatitudeChanged(data = location?.latitude.toString() )
+//        onLocLongitudeChanged(data = location?.longitude.toString() )
+//    }
+//    private fun onLocLatitudeChanged(data: String) {
+//        _locationState.update { it.copy(locLatitude = data) }
+//    }
+//    private fun onLocLongitudeChanged(data: String) {
+//        _locationState.update { it.copy(locLongitude = data) }
+//    }
 
     fun onInitialization() {
         _weatherState.update { it.copy(
@@ -153,12 +184,13 @@ class MainViewModelImpl(
             val weatherResponse = repo.getDisplayWeather(
                 isByLoc = isByLoc,
                 isForecast = isForecast,
+                isTodayOnly = true,
                 weatherState = weatherState.value
             )
             weatherResponse?.let { onWeatherChanged(it) }
         }
     }
-    private fun onDisplayLanding(
+    fun onDisplayLanding(
         isByLoc: Boolean,
         isForecast: Boolean
     ) {
@@ -166,7 +198,8 @@ class MainViewModelImpl(
             val weatherResponse = repo.getDisplayWeather(
                 isByLoc = isByLoc,
                 isForecast = isForecast,
-                weatherState = weatherState.value
+                weatherState = weatherState.value,
+                isTodayOnly = true
             )
             weatherResponse?.let { onWeatherChanged(it) }
         }
@@ -179,6 +212,7 @@ class MainViewModelImpl(
             val weatherResponse = repo.getDisplayWeather(
                 isByLoc = isByLoc,
                 isForecast = isForecast,
+                isTodayOnly =  false,
                 weatherState = weatherState.value
             )
             weatherResponse?.let { onWeatherChanged(it) }

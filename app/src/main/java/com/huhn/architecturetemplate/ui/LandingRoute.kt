@@ -1,6 +1,8 @@
 package com.huhn.architecturetemplate.ui
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,8 +54,11 @@ import coil.compose.AsyncImage
 import com.huhn.architecturetemplate.R
 import com.huhn.architecturetemplate.navigation.ForecastDestination
 import com.huhn.architecturetemplate.navigation.LandingDestination
+import com.huhn.architecturetemplate.utils.convertEpochToTime
 import com.huhn.architecturetemplate.utils.getActivity
+import com.huhn.architecturetemplate.utils.roundTemp
 import com.huhn.architecturetemplate.viewmodel.MainViewModelImpl
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,13 +71,9 @@ fun LandingRoute(
     val viewModel : MainViewModelImpl = koinViewModel()
     val state by viewModel.weatherState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = context.getActivity() as MainActivity
 
-    //preload weather from last time the app ran
-    LaunchedEffect(key1 = "firsttime" ){
-        viewModel.onInitialization()
-        viewModel.getCurrentLocation(context)
-        viewModel.onWeatherUserEvent(WeatherUserEvent.OnDisplayWeatherEvent(isByLoc = true, isForecast = true))
-   }
+
 
     LandingScreen (
         screenTitle = screenTitle,
@@ -95,8 +98,8 @@ fun LandingScreen(
     val navItems = listOf(
         LandingDestination,
         ForecastDestination,
-//    WeatherDestination
     )
+
 
     Scaffold(
         topBar = {
@@ -113,12 +116,20 @@ fun LandingScreen(
             )
         },
         bottomBar = {
-            BottomNavigation {
+            BottomNavigation(
+                backgroundColor = Color(0xFF008D75),
+                contentColor = Color.White
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 navItems.forEach { screen ->
+                    val icon = if (screen.route == "forecast_screen") {
+                        Icons.Filled.DateRange
+                    } else {
+                        Icons.Filled.Home
+                    }
                     BottomNavigationItem(
-                        icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                        icon = { Icon(icon, contentDescription = null) },
                         label = { Text(stringResource(screen.navLabel)) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                         onClick = {
@@ -140,22 +151,22 @@ fun LandingScreen(
                 }
             }
         },
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                content = { Text(text = "FAB")},
-//                onClick = {
-//                    /*TODO Do something here if have FAB */
-//
-//                },
-//                shape = RectangleShape,
-//            )
-//        }
 
     ) {it
         val context = LocalContext.current
         val activity : MainActivity = context.getActivity() as MainActivity
         var locPermissionRequested: Boolean by remember { mutableStateOf(false) }
         val locPermissionGranted: Boolean by remember { mutableStateOf(activity.isLocationPermissionGranted) }
+
+        LaunchedEffect(key1 = "firsttime" ){
+            onUserEvent(WeatherUserEvent.OnInitializeWeatherEvent)
+            activity.askLocationPermissions()
+            while (!activity.isLocationPermissionGranted) {
+                delay(1000)
+            }
+            onUserEvent(WeatherUserEvent.OnGetLocation(context))
+            onUserEvent(WeatherUserEvent.OnDisplayLandingEvent(isByLoc = true, isForecast = false))
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -167,13 +178,18 @@ fun LandingScreen(
             item {
                 Spacer(modifier = Modifier.height(95.0.dp))
             }
-            item {
-                Text(text = "*************************************", fontWeight = FontWeight.Bold)
-            }
-
-
-//***************************************************************************************************
-            if (locPermissionGranted) {
+                item {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        val msg = "Location: lat = ${state.latitude}, lng = ${state.longitude}"
+                        Text(text = msg,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp)
+                    }
+                }
                 item {
                     Row(
                         Modifier.fillMaxWidth(),
@@ -192,7 +208,7 @@ fun LandingScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "Wind:", fontWeight = FontWeight.Bold)
-                        Text(text = state.temp)
+                        Text(text = "Temp = ${roundTemp(state.temp)}\u00B0 F")
                     }
                 }
                 item {
@@ -205,7 +221,7 @@ fun LandingScreen(
                     ) {
                         Text(text = state.windDir)
                         Spacer(modifier = Modifier.width(5.0.dp))
-                        Text(text = "Feels Like ${state.feelsLike}")
+                        Text(text = "Feels Like ${roundTemp( state.feelsLike)}\u00B0 F")
                     }
                 }
 
@@ -219,7 +235,7 @@ fun LandingScreen(
                     ) {
                         Text(text = "${state.windSpeed} mph")
                         Spacer(modifier = Modifier.width(5.0.dp))
-                        Text(text = "${state.tempMax} / ${state.tempMin}")
+                        Text(text = "${roundTemp( state.tempMax)}\u00B0 F / ${roundTemp( state.tempMin)}\u00B0 F")
                     }
                 }
 
@@ -229,13 +245,15 @@ fun LandingScreen(
                     Row(
                         Modifier
                             .fillMaxWidth()
+                            .background(Color(0xFF008D75))
                             .padding(start = 20.dp, end = 20.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = forecast.dt_txt)
-                        Spacer(modifier = Modifier.width(5.0.dp))
-                        Text(text = forecast.temp)
+                        val time = convertEpochToTime(epoch = forecast.dt.toLong() * 1000)
+                        Text(text = time, color = Color.Black)
+                        Spacer(modifier = Modifier.width(40.0.dp))
+                        Text(text = "${roundTemp( forecast.temp)}\u00B0 F", color = Color.Black)
                         Spacer(modifier = Modifier.width(5.0.dp))
                         AsyncImage(
                             model = "https://openweathermap.org/img/wn/${forecast.icon}@2x.png",
@@ -252,27 +270,8 @@ fun LandingScreen(
                         )
                     }
                 }
-            } else {
-                item {
-                    Spacer(modifier = Modifier.height(95.0.dp))
-                    Text(text = "Location permission must be granted to run app")
-                }
-                item {
-                    if (locPermissionRequested) {
-                        Text(text = "Please uninstall/reinstall app")
-                    } else {
-                        Button(
-                            onClick = {
-                                locPermissionRequested = true
-                                activity.askLocationPermissions()
-                            })
-                        {
-                            Text(text = "Grant Location Permissions")
-                        }
-                    }
-                }
-            }
         }
-// ****************************************************************************************
     }
 }
+
+
