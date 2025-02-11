@@ -73,7 +73,7 @@ class MainViewModelImpl(
         _weatherState.update { it.copy(errorMsg = data) }
     }
 
-    fun getCurrentLocation(context: Context) {
+    private fun getCurrentLocation(context: Context) {
         GpsMonitor.fetchCurrentLocation(context = context, this::onGpsUpdate)
 //        onLocationChanged(locationState.value.location )
     }
@@ -190,7 +190,7 @@ class MainViewModelImpl(
             weatherResponse?.let { onWeatherChanged(it) }
         }
     }
-    fun onDisplayLanding(
+    private fun onDisplayLanding(
         isByLoc: Boolean,
         isForecast: Boolean
     ) {

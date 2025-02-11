@@ -37,7 +37,7 @@ data class ForecastResponse (
             windSpeed = this.list?.first()?.wind?.speed ?: 0.0
         )
     }
-    fun convertCompassHeading(degrees: Int) : String {
+    private fun convertCompassHeading(degrees: Int) : String {
         return when (degrees) {
             in 0..22 ->  "N"
             in 23..67 ->  "NE"
@@ -84,11 +84,10 @@ data class ForecastResponse (
                     //update the summary list
                     //find the summary entry for this day
                     var summaryEntry = forecastSummaryList.find { it.daySinceEpoch == day }
-                    var temp: Int
-                    try {
-                        temp = forecast.main.temp.toInt()
+                    val temp: Int = try {
+                        forecast.main.temp.toInt()
                     } catch (e: Exception) {
-                        temp = 0
+                        0
 
                     }
                     if (summaryEntry == null) {
@@ -104,7 +103,7 @@ data class ForecastResponse (
                     } else {
                         //update the summary entry
                         var newCount = (summaryEntry.icons[forecastItem.icon] ?: 0) + 1
-                        summaryEntry.icons.put(forecastItem.icon, newCount) //update the count
+                        summaryEntry.icons[forecastItem.icon] = newCount //update the count
 
                         summaryEntry.highTemp =
                             if (temp > summaryEntry.highTemp)
@@ -119,10 +118,8 @@ data class ForecastResponse (
                                 summaryEntry.lowTemp
 
                         newCount = (summaryEntry.description[forecastItem.description] ?: 0) + 1
-                        summaryEntry.description.put(
-                            forecastItem.description,
-                            newCount
-                        ) //update the count
+                        summaryEntry.description[forecastItem.description] =
+                            newCount //update the count
                     }
                 }
             }
@@ -131,7 +128,7 @@ data class ForecastResponse (
         if (!isTodayOnly) {
             val alreadySeenDay = mutableListOf<Long>()
             //only retain one entry per day, with the max's from the summary
-            forecastUIList.forEach() { origForecastState ->
+            forecastUIList.forEach { origForecastState ->
                 val day = convertEpochToDaysSinceEpoch(origForecastState.dt.toLong() * 1000)
                 if (!alreadySeenDay.contains(day)) {
                     alreadySeenDay.add(day)

@@ -9,12 +9,10 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.huhn.architecturetemplate.utils.getActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.huhn.architecturetemplate.utils.getActivity
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 
 class GpsMonitor {
     companion object {

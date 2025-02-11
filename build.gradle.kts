@@ -10,15 +10,17 @@ plugins {
      * see Applying external plugins with same version to subprojects.
      */
 
-    id("com.android.application") version "8.2.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.android.application") version "8.7.3" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.0" apply false
 
     id("com.android.library") version "8.1.4" apply false
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
+    id("com.google.devtools.ksp") version "2.1.10-1.0.29" apply false
+
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 buildscript {
     dependencies {
-        classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+        classpath(libs.secrets.gradle.plugin)
     }
 }

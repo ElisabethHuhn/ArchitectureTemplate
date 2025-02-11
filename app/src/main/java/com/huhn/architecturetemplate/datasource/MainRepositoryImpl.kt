@@ -4,7 +4,6 @@ import androidx.room.Room
 import com.huhn.architecturetemplate.application.ArchitectureTemplateApplication
 import com.huhn.architecturetemplate.datasource.localdatasource.AppDatabase
 import com.huhn.architecturetemplate.datasource.localdatasource.DBWeatherDao
-import com.huhn.architecturetemplate.datasource.localdatasource.dbModel.DBWeather
 import com.huhn.architecturetemplate.datasource.remotedatasource.WeatherApiService
 import com.huhn.architecturetemplate.datasource.remotedatasource.networkModel.WeatherResponse
 import com.huhn.architecturetemplate.ui.WeatherUIState
@@ -143,7 +142,7 @@ class MainRepositoryImpl(
         val deferredWeatherResponse = scope.async {
             val response : WeatherUIState? =
             if (isForecast) {
-                val forcecastResponse =  when {
+                val forecastResponse =  when {
                     (isByLoc &&
                             (latitude  != null) && (latitude  != 0.0) &&
                             (longitude != null) && (longitude != 0.0)) -> {
@@ -164,13 +163,13 @@ class MainRepositoryImpl(
 
                     else -> null
                 }
-//                forcecastResponse?.let {
+//                forecastResponse?.let {
 //                    //insert the weather into the local DB
 //                    val dbWeather = it.convertToDB()
 //                    dbWeatherDao.insertWeather(weather = dbWeather)
 //                }
 
-                forcecastResponse?.convertToState(position = 0, isTodayOnly = isTodayOnly)
+                forecastResponse?.convertToState(position = 0, isTodayOnly = isTodayOnly)
             }
             else {
                 val weatherResponse : WeatherResponse? =

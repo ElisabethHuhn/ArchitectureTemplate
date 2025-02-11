@@ -1,8 +1,6 @@
 package com.huhn.architecturetemplate.ui
 
 import android.content.Context
-import android.location.Location
-import com.google.android.gms.location.FusedLocationProviderClient
 
 
 data class WeatherUIState(
