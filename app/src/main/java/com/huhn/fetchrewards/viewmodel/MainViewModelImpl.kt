@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.huhn.fetchrewards.datasource.MainRepositoryImpl
 import com.huhn.fetchrewards.datasource.remotedatasource.networkModel.User
-import com.huhn.fetchrewards.datasource.remotedatasource.networkModel.UserResponse
 import com.huhn.fetchrewards.ui.UserEvent
 import com.huhn.fetchrewards.ui.UserUIState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +48,7 @@ class MainViewModelImpl(
             userIdList = ArrayList(),
             user = null,
         ) }
+        onGetUsers()
     }
 
     //endregion

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FetchRewards</string>
 
-    <string name="user_title">User Title</string>
+    <string name="user_title">Users</string>
     <string name="landing_title">Landing Screen</string>
     <string name="forecast_title">Forecast Screen</string>
     <string name="user">Users</string>

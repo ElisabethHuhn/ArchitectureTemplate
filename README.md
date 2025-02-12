@@ -73,6 +73,7 @@ Testing the UI, ViewModel, Repository and local/remote data sources is straightf
 
 # Future Work
 * Two screens: one with list of ListIds with # of users, and one with list of users for a ListId
+* Implement isRefreshing and IsInitialized
 * Automated Testing
     * Unit Testing
     * UI Testing
