@@ -4,7 +4,10 @@
 
 This project is a specific example of using the template as a starting point.
 
-In particular, it is for an interview with Fetch. It is located in as a branch on my Architectural Template App Repository https://github.com/ElisabethHuhn/ArchitectureTemplate/tree/fetchrewards
+In particular, it is for an interview with Fetch. It is located in as a branch on my 
+Architectural Template App Repository https://github.com/ElisabethHuhn/ArchitectureTemplate/tree/fetchrewards
+
+I use Android Studio to build and run this branch in the emulator
 
 # Discussion
 
