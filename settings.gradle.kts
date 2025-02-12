@@ -49,6 +49,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ArchitectureTemplate"
+rootProject.name = "FetchRewards"
 include(":app")
  

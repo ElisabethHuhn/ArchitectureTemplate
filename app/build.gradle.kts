@@ -34,7 +34,7 @@ android {
     /*
      * The app's namespace. Used as the package name for generated R and BuildConfig classes
      */
-    namespace = "com.huhn.architecturetemplate"
+    namespace = "com.huhn.fetchrewards"
     /*
      * compileSdk
      * determines which Android and Java APIs are available when compiling the source code.
@@ -50,8 +50,8 @@ android {
      */
     defaultConfig {
         // applicationId Uniquely identifies the package for publishing.
-        applicationId = "com.huhn.architecturetemplate"
-        // testApplicationId "com.huhn.architecturetemplate.test"
+        applicationId = "com.huhn.fetchrewards"
+        // testApplicationId "com.huhn.fetchrewards.test"
 
         minSdk = 26 //specifies the lowest version of Android that the app will run on
         /*
